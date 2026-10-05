@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Blog Post: <%= blogTitle %></title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 300;
+      }
+      .content {
+        padding: 40px 30px;
+      }
+      .blog-preview {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 25px;
+        margin: 20px 0;
+        border-left: 4px solid #667eea;
+      }
+      .blog-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+      }
+      .blog-description {
+        font-size: 16px;
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+      .button {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 30px;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: 600;
+        margin: 10px 0;
+        transition: transform 0.2s;
+      }
+      .button:hover {
+        transform: translateY(-2px);
+      }
+      .footer {
+        background-color: #f8f9fa;
+        padding: 20px 30px;
+        text-align: center;
+        font-size: 14px;
+        color: #666;
+      }
+      .unsubscribe-link {
+        color: #667eea;
+        text-decoration: none;
+      }
+      .unsubscribe-link:hover {
+        text-decoration: underline;
+      }
+      .notification-badge {
+        background-color: #ff6b6b;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 15px;
+      }
+      .info-section {
+        background-color: #fff5f5;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        border-left: 4px solid #ff6b6b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📝 New Blog Post Alert!</h1>
+      </div>
+
+      <div class="content">
+        <div class="notification-badge">🆕 FRESH CONTENT</div>
+
+        <h2 style="margin-top: 0">Hi there! 👋</h2>
+
+        <p>We just published a new blog post that we think you'll love!</p>
+
+        <div class="blog-preview">
+          <div class="blog-title"><%= blogTitle %></div>
+          <div class="blog-description"><%= blogDescription %></div>
+
+          <div style="text-align: center; margin: 20px 0">
+            <a href="<%= blogUrl %>" class="button">Read Full Article</a>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <strong>💡 Why you're receiving this:</strong>
+          <p>
+            You're subscribed to our newsletter and we want to make sure you
+            don't miss our latest content!
+          </p>
+        </div>
+
+        <p style="text-align: center; color: #666; font-size: 14px">
+          Happy reading! 📚
+        </p>
+      </div>
+
+      <div class="footer">
+        <p>
+          © <%= new Date().getFullYear() %> <%= companyName %>. All rights
+          reserved.
+        </p>
+        <p>
+          <a href="<%= unsubscribeUrl %>" class="unsubscribe-link"
+            >Unsubscribe from this newsletter</a
+          >
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
