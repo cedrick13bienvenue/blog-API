@@ -95,8 +95,18 @@ export const createBlog = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
+// Fields a client is allowed to change via this endpoint. author/id/createdAt
+// must never come from req.body -- spreading the whole body let a caller
+// reassign a blog's author or other fields it shouldn't control.
+const UPDATABLE_BLOG_FIELDS = ['title', 'description', 'content', 'isPublished'] as const;
+
 export const updateBlog = asyncHandler(async (req: Request, res: Response) => {
-  const updateData: any = { ...req.body, updatedAt: new Date() };
+  const updateData: any = { updatedAt: new Date() };
+  for (const field of UPDATABLE_BLOG_FIELDS) {
+    if (req.body[field] !== undefined) {
+      updateData[field] = req.body[field];
+    }
+  }
   // Convert string 'true'/'false' to boolean if isPublished is provided
   if (updateData.isPublished !== undefined) {
     updateData.isPublished = updateData.isPublished === 'true' || updateData.isPublished === true;
