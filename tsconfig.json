@@ -2,6 +2,7 @@
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 "typeRoots": ["./src/types", "./node_modules/@types"],
+    "ignoreDeprecations": "5.0",                       /* Silence the node10 moduleResolution deprecation warning; switching to nodenext would need module/import changes across the project. */
     /* Projects */
     // "incremental": true,                              /* Save .tsbuildinfo files to allow for incremental compilation of projects. */
     // "composite": true,                                /* Enable constraints that allow a TypeScript project to be used with project references. */
