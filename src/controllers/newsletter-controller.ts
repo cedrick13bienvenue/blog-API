@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { NewsletterService } from '../services/newsletter-service';
 import { ResponseService } from '../utils/response';
 import { asyncHandler } from '../utils/async-handler';
+import { isValidEmail } from '../utils/validators';
 
 // Subscribe to newsletter
 export const subscribeToNewsletter = asyncHandler(async (req: Request, res: Response) => {
@@ -17,8 +18,7 @@ export const subscribeToNewsletter = asyncHandler(async (req: Request, res: Resp
   }
 
   // Validate email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
+  if (!isValidEmail(email)) {
     return ResponseService({
       res,
       status: 400,

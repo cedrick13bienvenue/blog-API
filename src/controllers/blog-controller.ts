@@ -9,6 +9,7 @@ import { uploadFile } from '../utils/upload';
 import { triggerBlogCreated } from '../services/event-service';
 import { IRequestUser } from '../middlewares/protect';
 import { asyncHandler } from '../utils/async-handler';
+import { logInfo, logError } from '../config/logger';
 
 export const getAllBlogs = asyncHandler(async (_req: Request, res: Response) => {
   // Previously ran 2 count queries per blog (2N+1 total). Aggregate likes and
@@ -86,9 +87,9 @@ export const createBlog = asyncHandler(async (req: Request, res: Response) => {
   if (isPublishedBool) {
     try {
       triggerBlogCreated(blog.toJSON());
-      console.log('🎯 Blog created event triggered for newsletter notifications');
+      logInfo('Blog created event triggered for newsletter notifications');
     } catch (error) {
-      console.error('❌ Failed to trigger blog created event:', error);
+      logError('Failed to trigger blog created event', { error });
       // Don't fail the blog creation if event fails
     }
   }
