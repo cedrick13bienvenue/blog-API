@@ -3,12 +3,20 @@ import { LikeModel, LikeAttributes } from '../models/like-model';
 import { BlogModel } from '../models/blog-model';
 import { UserModel } from '../models/user-model';
 import { ResponseService } from '../utils/response';
-// Removed: import { IRequestUser } from '../middlewares/protect';
+import { IRequestUser } from '../middlewares/protect';
 
 export const toggleLike = async (req: Request, res: Response) => {
   try {
     const { blogId } = req.params;
-    const userId = (req.user as any)?.id;
+    const userId = (req.user as IRequestUser['user'])?.id;
+    if (!userId) {
+      return ResponseService({
+        res,
+        status: 401,
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
 
     // Check if blog exists
     const blog = await BlogModel.findByPk(blogId);
@@ -34,7 +42,7 @@ export const toggleLike = async (req: Request, res: Response) => {
       });
     } else {
       // Like: create new like
-      await LikeModel.create({ blog: Number(blogId), user: userId });
+      await LikeModel.create({ blog: Number(blogId), user: Number(userId) });
       return ResponseService({
         res,
         message: 'Blog liked successfully',

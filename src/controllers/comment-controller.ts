@@ -3,13 +3,22 @@ import { CommentModel, CommentAttributes } from '../models/comment-model';
 import { BlogModel } from '../models/blog-model';
 import { UserModel } from '../models/user-model';
 import { ResponseService } from '../utils/response';
-// Removed: import { IRequestUser } from '../middlewares/protect';
+import { IRequestUser } from '../middlewares/protect';
 
 export const createComment = async (req: Request, res: Response) => {
   try {
     const { blogId } = req.params;
-    const userId = (req.user as any)?.id; // from session
+    const userId = (req.user as IRequestUser['user'])?.id;
     const { content } = req.body;
+
+    if (!userId) {
+      return ResponseService({
+        res,
+        status: 401,
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
 
     // Check blog exists
     const blog = await BlogModel.findByPk(blogId);
@@ -25,7 +34,7 @@ export const createComment = async (req: Request, res: Response) => {
     // Create comment
     const comment = await CommentModel.create({
       blog: Number(blogId),
-      user: userId,
+      user: Number(userId),
       content,
     });
 

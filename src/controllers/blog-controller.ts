@@ -6,6 +6,7 @@ import { generateSlug } from '../utils/helper';
 import { ResponseService } from '../utils/response';
 import { uploadFile } from '../utils/upload';
 import { triggerBlogCreated } from '../services/event-service';
+import { IRequestUser } from '../middlewares/protect';
 
 export const getAllBlogs = async (_req: Request, res: Response) => {
   try {
@@ -66,6 +67,15 @@ export const getABlog = async (req: Request, res: Response) => {
 export const createBlog = async (req: Request, res: Response) => {
   try {
     const { title, description, content, isPublished } = req.body;
+    const authorId = (req.user as IRequestUser['user'])?.id;
+    if (!authorId) {
+      return ResponseService({
+        res,
+        status: 401,
+        success: false,
+        message: 'Unauthorized',
+      });
+    }
     let imageUrl = '';
     if (req.file) {
       imageUrl = await uploadFile(req.file);
@@ -77,7 +87,7 @@ export const createBlog = async (req: Request, res: Response) => {
       title: cleanTitle,
       slug: generateSlug(cleanTitle),
       description,
-      author: (req.user as any)?.id, // Use user id from session
+      author: Number(authorId),
       content,
       isPublished: isPublishedBool,
       image: imageUrl,
