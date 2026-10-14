@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { CommentModel, CommentAttributes } from '../models/comment-model';
-import { BlogModel } from '../models/blog-model';
 import { UserModel } from '../models/user-model';
 import { ResponseService } from '../utils/response';
 import { IRequestUser } from '../middlewares/protect';
 import { asyncHandler } from '../utils/async-handler';
+import { findBlogOrRespond } from '../utils/helper';
 
 export const createComment = asyncHandler(async (req: Request, res: Response) => {
   const { blogId } = req.params;
@@ -21,15 +21,8 @@ export const createComment = asyncHandler(async (req: Request, res: Response) =>
   }
 
   // Check blog exists
-  const blog = await BlogModel.findByPk(blogId);
-  if (!blog) {
-    return ResponseService({
-      res,
-      status: 404,
-      success: false,
-      message: 'Blog not found',
-    });
-  }
+  const blog = await findBlogOrRespond(blogId, res);
+  if (!blog) return;
 
   // Create comment
   const comment = await CommentModel.create({

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { BlogModel, BlogAttributes } from '../models/blog-model';
 import { LikeModel } from '../models/like-model';
 import { CommentModel } from '../models/comment-model';
-import { generateSlug } from '../utils/helper';
+import { generateSlug, findBlogOrRespond } from '../utils/helper';
 import { ResponseService } from '../utils/response';
 import { uploadFile } from '../utils/upload';
 import { triggerBlogCreated } from '../services/event-service';
@@ -27,15 +27,8 @@ export const getAllBlogs = asyncHandler(async (_req: Request, res: Response) => 
 });
 
 export const getABlog = asyncHandler(async (req: Request, res: Response) => {
-  const blog = await BlogModel.findByPk(req.params.id);
-  if (!blog) {
-    return ResponseService({
-      res,
-      status: 404,
-      success: false,
-      message: 'Blog not found',
-    });
-  }
+  const blog = await findBlogOrRespond(req.params.id, res);
+  if (!blog) return;
   // Get likes and comments count
   const likesCount = await LikeModel.count({ where: { blog: blog.id } });
   const commentsCount = await CommentModel.count({ where: { blog: blog.id } });

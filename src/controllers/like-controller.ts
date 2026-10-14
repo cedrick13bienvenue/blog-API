@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import { LikeModel, LikeAttributes } from '../models/like-model';
-import { BlogModel } from '../models/blog-model';
 import { UserModel } from '../models/user-model';
 import { ResponseService } from '../utils/response';
 import { IRequestUser } from '../middlewares/protect';
 import { asyncHandler } from '../utils/async-handler';
+import { findBlogOrRespond } from '../utils/helper';
 
 export const toggleLike = asyncHandler(async (req: Request, res: Response) => {
   const { blogId } = req.params;
@@ -19,15 +19,8 @@ export const toggleLike = asyncHandler(async (req: Request, res: Response) => {
   }
 
   // Check if blog exists
-  const blog = await BlogModel.findByPk(blogId);
-  if (!blog) {
-    return ResponseService({
-      res,
-      status: 404,
-      success: false,
-      message: 'Blog not found',
-    });
-  }
+  const blog = await findBlogOrRespond(blogId, res);
+  if (!blog) return;
 
   // Check if user already liked this blog
   const existingLike = await LikeModel.findOne({ where: { blog: blogId, user: userId } });
