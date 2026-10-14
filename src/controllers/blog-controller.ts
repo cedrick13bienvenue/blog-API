@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { fn, col } from 'sequelize';
 import { BlogModel, BlogAttributes } from '../models/blog-model';
 import { LikeModel } from '../models/like-model';
 import { CommentModel } from '../models/comment-model';
@@ -10,19 +11,31 @@ import { IRequestUser } from '../middlewares/protect';
 import { asyncHandler } from '../utils/async-handler';
 
 export const getAllBlogs = asyncHandler(async (_req: Request, res: Response) => {
-  const blogs = await BlogModel.findAll();
-  // Get likes and comments count for each blog
-  const blogsWithCounts = await Promise.all(
-    blogs.map(async (blog) => {
-      const likesCount = await LikeModel.count({ where: { blog: blog.id } });
-      const commentsCount = await CommentModel.count({ where: { blog: blog.id } });
-      return {
-        ...blog.toJSON(),
-        likesCount,
-        commentsCount,
-      };
-    })
-  );
+  // Previously ran 2 count queries per blog (2N+1 total). Aggregate likes and
+  // comments per blog in 2 GROUP BY queries instead, regardless of blog count.
+  const [blogs, likeCounts, commentCounts] = await Promise.all([
+    BlogModel.findAll(),
+    LikeModel.findAll({
+      attributes: ['blog', [fn('COUNT', col('id')), 'count']],
+      group: ['blog'],
+      raw: true,
+    }) as unknown as Promise<Array<{ blog: number; count: string }>>,
+    CommentModel.findAll({
+      attributes: ['blog', [fn('COUNT', col('id')), 'count']],
+      group: ['blog'],
+      raw: true,
+    }) as unknown as Promise<Array<{ blog: number; count: string }>>,
+  ]);
+
+  const likeCountByBlog = new Map(likeCounts.map((row) => [row.blog, Number(row.count)]));
+  const commentCountByBlog = new Map(commentCounts.map((row) => [row.blog, Number(row.count)]));
+
+  const blogsWithCounts = blogs.map((blog) => ({
+    ...blog.toJSON(),
+    likesCount: likeCountByBlog.get(blog.id) ?? 0,
+    commentsCount: commentCountByBlog.get(blog.id) ?? 0,
+  }));
+
   ResponseService({ res, data: blogsWithCounts });
 });
 
