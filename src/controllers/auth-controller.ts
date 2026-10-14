@@ -5,6 +5,10 @@ import { ResponseService } from '../utils/response';
 import { comparePassword } from '../utils/password';
 import { generateToken } from '../utils/jwt';
 import { blacklistedSessions } from '../middlewares/session-blacklist';
+import { IRequestUser } from '../middlewares/protect';
+
+// Google OAuth / session-based routes attach a full UserModel instance to req.user via Passport
+type SessionUser = UserModel;
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
@@ -108,7 +112,7 @@ export const loginUser = async (req: Request, res: Response) => {
 // Google OAuth2 callback handler
 export const handleGoogleCallback = async (req: Request, res: Response) => {
   try {
-    const user = req.user as any;
+    const user = req.user as SessionUser | undefined;
     if (!user) {
       return ResponseService({
         res,
@@ -146,7 +150,7 @@ export const handleGoogleCallback = async (req: Request, res: Response) => {
 export const checkAuthStatus = async (req: Request, res: Response) => {
   try {
     if (req.isAuthenticated()) {
-      const user = req.user as any;
+      const user = req.user as SessionUser;
       const token = generateToken({
         id: user.id,
         email: user.email,
@@ -190,7 +194,7 @@ export const checkAuthStatus = async (req: Request, res: Response) => {
 export const handleAlreadyAuthenticated = async (req: Request, res: Response) => {
   try {
     if (req.isAuthenticated()) {
-      const user = req.user as any;
+      const user = req.user as SessionUser;
       const token = generateToken({
         id: user.id,
         email: user.email,
@@ -221,13 +225,23 @@ export const handleAlreadyAuthenticated = async (req: Request, res: Response) =>
 // Get user profile (JWT protected)
 export const getUserProfile = async (req: Request, res: Response) => {
   try {
-    const user = req.user as any;
-    if (!user) {
+    const authUser = req.user as IRequestUser['user'];
+    if (!authUser) {
       return ResponseService({
         res,
         status: 401,
         success: false,
         message: 'Unauthorized',
+      });
+    }
+
+    const user = await UserModel.findByPk(authUser.id);
+    if (!user) {
+      return ResponseService({
+        res,
+        status: 404,
+        success: false,
+        message: 'User not found',
       });
     }
 
